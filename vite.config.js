@@ -21,7 +21,7 @@ export default defineConfig(({ mode }) => ({
     // /api/board -> {target}/board 형태로 prefix 를 제거해 전달한다.
     proxy: {
       "/api": {
-        target: process.env.VITE_APP_API_PROXY_TARGET || "http://localhost:8080",
+        target: process.env.VITE_APP_API_PROXY_TARGET || "http://preview-egovframe-backend-svc-01:8080",
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api/, ""),
       },

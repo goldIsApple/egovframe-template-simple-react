@@ -1,4 +1,4 @@
-import { defineConfig } from "vite";
+import { defineConfig, loadEnv } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
 import { fileURLToPath } from "url";
@@ -6,7 +6,10 @@ import { fileURLToPath } from "url";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 // https://vitejs.dev/config/
-export default defineConfig(({ mode }) => ({
+export default defineConfig(({ mode }) => {
+  const env = loadEnv(mode, process.cwd(), "");
+
+  return {
   plugins: [
     react({
       include: "**/*.{jsx,js}",
@@ -17,11 +20,11 @@ export default defineConfig(({ mode }) => ({
   server: {
     port: 3000,
     // 개발 서버에서도 배포(nginx)와 동일하게 /api prefix 를 백엔드로 프록시한다.
-    // 대상 호스트는 VITE_APP_API_PROXY_TARGET 로 바꿀 수 있고, 미지정 시 로컬 백엔드를 사용한다.
+    // 대상 호스트는 VITE_APP_API_PROXY_TARGET 로 바꿀 수 있고, 미지정 시 클러스터 백엔드 서비스를 사용한다.
     // /api/board -> {target}/board 형태로 prefix 를 제거해 전달한다.
     proxy: {
       "/api": {
-        target: process.env.VITE_APP_API_PROXY_TARGET || "http://seowon-app-egovframe-backend-svc-01:8080",
+        target: env.VITE_APP_API_PROXY_TARGET || "http://seowon-app-egovframe-backend-svc-01:8080",
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api/, ""),
       },
@@ -67,4 +70,5 @@ export default defineConfig(({ mode }) => ({
       },
     },
   },
-}));
+  };
+});

@@ -24,7 +24,7 @@ FROM nginxinc/nginx-unprivileged:1.27-alpine
 
 # 백엔드 주소. nginx 공식 이미지의 envsubst 단계(/docker-entrypoint.d/20-envsubst-on-templates.sh)가
 # 컨테이너 기동 시 default.conf.template 의 ${BACKEND_URL} 를 이 값으로 치환한다.
-ENV BACKEND_URL=http://egov-simple-backend:8080
+ENV BACKEND_URL=http://seowon-app-egovframe-backend-svc-01:8080
 
 # Static bundle
 COPY --from=build /workspace/dist /usr/share/nginx/html

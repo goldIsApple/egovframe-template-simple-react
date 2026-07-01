@@ -130,15 +130,15 @@ npm install
 
 ### 2. 백엔드 프로젝트 설정
 
-구동된 BackEnd 서버의 URL을 본 어플리케이션의 .env.development 파일의 VITE_APP_EGOV_CONTEXT_URL에 설정해 준다.
+구동된 BackEnd 서버의 URL을 본 어플리케이션의 .env.development 파일의 VITE_APP_API_PROXY_TARGET에 설정해 준다.
 (단, 개발환경에서는 사용하는 환경변수 정보는 .env.development, build 시 사용하는 환경변수는 .env.production 에 기입해 준다.)
 
 ```bash
 # .env.development 예시
-VITE_APP_EGOV_CONTEXT_URL=localhost:8080
+VITE_APP_API_PROXY_TARGET=http://localhost:8080
 ```
 
-> `VITE_APP_EGOV_CONTEXT_URL` 은 개발 서버(`npm run dev`) 흐름에서 백엔드를 별도 호스트로 직접 호출할 때 사용하는 변수다.
+> `VITE_APP_API_PROXY_TARGET` 은 개발 서버(`npm run dev`)의 `/api` 프록시 대상 백엔드를 지정하는 변수다.
 > 컨테이너/Kubernetes 배포에서는 nginx 가 `/api` 로 리버스 프록시하므로 이 변수 대신 `BACKEND_URL`(런타임 주입)을 사용한다.
 > 자세한 내용은 아래 "컨테이너 배포" 절을 참고한다.
 
@@ -233,10 +233,9 @@ kubectl port-forward svc/egov-simple-react 3000:8080
 # http://localhost:3000/ 접속
 ```
 
-백엔드 연동: `k8s/deployment.yaml` 의 `BACKEND_URL` 환경변수가 백엔드 템플릿
-(`egovframe-template-simple-backend`)의 k8s Service 이름과 일치하도록 `http://egovframe-template-simple-backend:8080`
-으로 기본 설정되어 있다. 백엔드를 함께 배포하면 두 매니페스트의 기본값만으로 연동된다. 다른 네임스페이스에
-배포하는 경우 FQDN 으로 조정한다(예: `http://egovframe-template-simple-backend.<namespace>.svc.cluster.local:8080`).
+백엔드 연동: `k8s/deployment.yaml` 의 `BACKEND_URL` 환경변수가 실제 백엔드 k8s Service 이름과 일치하도록
+`http://seowon-app-egovframe-backend-svc-01:8080` 으로 기본 설정되어 있다. 다른 네임스페이스에 배포하는 경우
+FQDN 으로 조정한다(예: `http://seowon-app-egovframe-backend-svc-01.<namespace>.svc.cluster.local:8080`).
 nginx 컨테이너는 `readOnlyRootFilesystem` 이므로 기동 시 `BACKEND_URL` 치환 결과를
 `emptyDir`(`/etc/nginx/conf.d`)에 기록한다.
 

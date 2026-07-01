@@ -139,7 +139,7 @@ VITE_APP_API_PROXY_TARGET=http://localhost:8080
 ```
 
 > `VITE_APP_API_PROXY_TARGET` 은 개발 서버(`npm run dev`)의 `/api` 프록시 대상 백엔드를 지정하는 변수다.
-> 컨테이너/Kubernetes 배포에서는 nginx 가 `/api` 로 리버스 프록시하므로 이 변수 대신 `BACKEND_URL`(런타임 주입)을 사용한다.
+> 컨테이너/Kubernetes 배포에서는 런타임 서버가 `/api` 로 리버스 프록시하므로 이 변수 대신 `BACKEND_URL`(런타임 주입)을 사용한다.
 > 자세한 내용은 아래 "컨테이너 배포" 절을 참고한다.
 
 ### 3. 프로젝트 실행 및 기타 명령어
@@ -170,8 +170,9 @@ npm run test:run
 
 ## 컨테이너 배포 (Docker / Kubernetes)
 
-정적 번들을 nginx 로 호스팅하는 컨테이너 이미지와 Kubernetes 매니페스트를 제공한다.
-nginx 가 `/api/*` 요청을 백엔드로 리버스 프록시하므로, 프론트엔드는 백엔드 주소를 빌드 시점에 고정하지 않고
+정적 번들을 호스팅하는 컨테이너 이미지와 Kubernetes 매니페스트를 제공한다.
+빌드팩 배포에서는 `npm start` 가 `server.mjs` 를 실행하며, 이 런타임 서버가 `/api/*` 요청을 백엔드로 리버스 프록시한다.
+프론트엔드는 백엔드 주소를 빌드 시점에 고정하지 않고
 **동일 출처 상대경로(`/api`)** 로 호출한다. 백엔드 주소는 런타임에 `BACKEND_URL` 환경변수로 주입한다.
 
 > API base 는 `src/config.js` 의 `SERVER_URL` 로 결정되며 기본값은 `/api` 이다.
@@ -221,7 +222,7 @@ docker compose --profile fullstack up -d
 # http://localhost:3000/ 접속 후 admin / Admin@1234 로 로그인
 ```
 
-이 구성에서 브라우저 → nginx(`/api/*`) → 백엔드(`:8080`) → MySQL 경로로 로그인과 게시판 CRUD 가 한 번에 동작한다.
+이 구성에서 브라우저 → 프론트 런타임(`/api/*`) → 백엔드(`:8080`) → MySQL 경로로 로그인과 게시판 CRUD 가 한 번에 동작한다.
 
 ### 3. Kubernetes 배포
 
@@ -236,8 +237,7 @@ kubectl port-forward svc/egov-simple-react 3000:8080
 백엔드 연동: `k8s/deployment.yaml` 의 `BACKEND_URL` 환경변수가 실제 백엔드 k8s Service 이름과 일치하도록
 `http://seowon-app-egovframe-backend-svc-01:8080` 으로 기본 설정되어 있다. 다른 네임스페이스에 배포하는 경우
 FQDN 으로 조정한다(예: `http://seowon-app-egovframe-backend-svc-01.<namespace>.svc.cluster.local:8080`).
-nginx 컨테이너는 `readOnlyRootFilesystem` 이므로 기동 시 `BACKEND_URL` 치환 결과를
-`emptyDir`(`/etc/nginx/conf.d`)에 기록한다.
+빌드팩 이미지는 `npm run build` 로 생성된 `dist` 를 `npm start` 로 서빙하며, `/api` prefix 를 제거해 백엔드로 전달한다.
 
 ---
 
